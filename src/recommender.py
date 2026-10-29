@@ -39,12 +39,47 @@ class Recommender:
         self.songs = songs
 
     def recommend(self, user: UserProfile, k: int = 5) -> List[Song]:
-        # TODO: Implement recommendation logic
-        return self.songs[:k]
+        user_prefs = {
+            "favorite_genre": user.favorite_genre,
+            "favorite_mood": user.favorite_mood,
+            "target_energy": user.target_energy,
+        }
+        ranked_songs = []
+        for song in self.songs:
+            song_data = {
+                "title": song.title,
+                "genre": song.genre,
+                "mood": song.mood,
+                "energy": song.energy,
+                "tempo_bpm": song.tempo_bpm,
+            }
+            score, _ = score_song(user_prefs, song_data)
+            ranked_songs.append((song, score))
+
+        ranked_songs.sort(
+            key=lambda result: (
+                -result[1],
+                result[0].title.casefold(),
+                result[0].title,
+            )
+        )
+        return [song for song, _ in ranked_songs[:max(0, k)]]
 
     def explain_recommendation(self, user: UserProfile, song: Song) -> str:
-        # TODO: Implement explanation logic
-        return "Explanation placeholder"
+        user_prefs = {
+            "favorite_genre": user.favorite_genre,
+            "favorite_mood": user.favorite_mood,
+            "target_energy": user.target_energy,
+        }
+        song_data = {
+            "title": song.title,
+            "genre": song.genre,
+            "mood": song.mood,
+            "energy": song.energy,
+            "tempo_bpm": song.tempo_bpm,
+        }
+        score, reasons = score_song(user_prefs, song_data)
+        return f"Score: {score:.2f}. " + "; ".join(reasons)
 
 def load_songs(csv_path: str) -> List[Dict]:
     """
@@ -76,8 +111,8 @@ def load_songs(csv_path: str) -> List[Dict]:
 def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     """Score a song's similarity to the supplied user preferences."""
     preferences = (
-        ("mood", ("favorite_mood", "mood"), 3.0),
-        ("genre", ("favorite_genre", "genre"), 2.0),
+        ("mood", ("favorite_mood", "mood"), 2.0),
+        ("genre", ("favorite_genre", "genre"), 3.0),
         ("energy", ("target_energy", "energy"), 2.0),
         ("tempo_bpm", ("target_tempo", "tempo_bpm", "tempo"), 1.0),
     )

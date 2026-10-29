@@ -1,111 +1,64 @@
 # 🎧 Model Card: Music Recommender Simulation
 
-## 1. Model Name  
+## 1. Model Name
 
-Give your model a short, descriptive name.  
-Example: **VibeFinder 1.0**  
-
----
-
-## 2. Intended Use  
-
-Describe what your recommender is designed to do and who it is for. 
-
-Prompts:  
-
-- What kind of recommendations does it generate  
-- What assumptions does it make about the user  
-- Is this for real users or classroom exploration  
+**VibeMatch 1.0** recommends songs that fit a user's selected music preferences.
 
 ---
 
-## 3. How the Model Works  
+## 2. Intended Use
 
-Explain your scoring approach in simple language.  
-
-Prompts:  
-
-- What features of each song are used (genre, energy, mood, etc.)  
-- What user preferences are considered  
-- How does the model turn those into a score  
-- What changes did you make from the starter logic  
-
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
+VibeMatch ranks songs by how well they match a user's preferred genre, mood, and energy. It is designed for classroom exploration, not for making decisions about real listeners or replacing a full music service. It assumes that a few preference labels are enough to describe what someone wants to hear.
 
 ---
 
-## 4. Data  
+## 3. How the Model Works
 
-Describe the dataset the model uses.  
-
-Prompts:  
-
-- How many songs are in the catalog  
-- What genres or moods are represented  
-- Did you add or remove data  
-- Are there parts of musical taste missing in the dataset  
+Each song has a genre, mood, energy, tempo, valence, danceability, and acousticness, plus its title and artist. The profile can provide a preferred genre and mood, a target energy, and optionally a target tempo; acousticness preference is stored in the `UserProfile` class but is not part of the current scoring function. Genre has weight 3, mood has weight 2, energy has weight 2, and optional tempo has weight 1. Genre and mood earn points for exact matches, while energy and tempo earn more points when they are closer to the target. The recommender combines available similarities into a score from 0 to 100, sorts songs from highest to lowest, and returns the top five.
 
 ---
 
-## 5. Strengths  
+## 4. Data
 
-Where does your system seem to work well  
-
-Prompts:  
-
-- User types for which it gives reasonable results  
-- Any patterns you think your scoring captures correctly  
-- Cases where the recommendations matched your intuition  
+The catalog has 18 songs, with genres such as pop, lofi, rock, jazz, country, and classical, and moods such as happy, chill, intense, relaxed, and melancholy. The project uses the provided catalog without adding or removing songs. Many genres and moods have only one example, so the data does not represent the full range of music or listener preferences.
 
 ---
 
-## 6. Limitations and Bias 
+## 5. Strengths
 
-Where the system struggles or behaves unfairly. 
-
-Prompts:  
-
-- Features it does not consider  
-- Genres or moods that are underrepresented  
-- Cases where the system overfits to one preference  
-- Ways the scoring might unintentionally favor some users  
+The recommender works well when the catalog contains songs that match the user's genre, mood, and energy, as with Chill Lofi and Deep Intense Rock. The matching lofi songs and Storm Runner rank highly for those profiles, which fits the preferences. The explanations also show which preferences each song matched or missed.
 
 ---
 
-## 7. Evaluation  
+## 6. Limitations and Bias
 
-How you checked whether the recommender behaved as expected. 
-
-Prompts:  
-
-- Which user profiles you tested  
-- What you looked for in the recommendations  
-- What surprised you  
-- Any simple tests or comparisons you ran  
-
-No need for numeric metrics unless you created some.
+The catalog has only 18 songs, so many genres and moods are underrepresented, which can leave some listeners with weak or repetitive matches. The score uses genre, mood, energy, and optional tempo, but ignores features such as acousticness, valence, danceability, lyrics, and listening history. Genre and mood require exact label matches, while genre has weight 3 compared with weight 2 for mood and energy, potentially favoring genre over other preferences. Energy similarity reaches zero when the song differs from the target by 0.5 or more, and ranking by score alone offers no diversity or exploration.
 
 ---
 
-## 8. Future Work  
+## 7. Evaluation
 
-Ideas for how you would improve the model next.  
+I tested High-Energy Pop, Chill Lofi, Deep Intense Rock, and an edge-case profile combining high energy with a melancholy mood and rock genre. I checked whether songs matching each profile's genre, mood, and energy tended to rank near the top, then compared the profiles pair by pair:
 
-Prompts:  
+- **High-Energy Pop vs. Chill Lofi:** Pop songs such as Sunrise City and Gym Hero lead the pop profile; Midnight Coding and Library Rain lead the lofi profile. Their different genres, moods, and energy targets explain the change.
+- **High-Energy Pop vs. Deep Intense Rock:** Both profiles ask for high energy, but pop favors pop tracks and rock favors Storm Runner. Gym Hero ranks highly in both because it is pop, intense, and energetic.
+- **High-Energy Pop vs. the edge case:** The pop profile favors happy pop, while the edge case favors melancholy rock. Storm Runner ranks high for the edge case because it matches rock and energy, even though its mood is not melancholy.
+- **Chill Lofi vs. Deep Intense Rock:** Low-energy lofi songs lead one profile, while high-energy rock leads the other. This fits their different genres and energy targets.
+- **Chill Lofi vs. the edge case:** Lofi songs with lower energy lead the chill list, while the edge case favors energetic rock. Last Call Blues matches melancholy, but its low energy and non-rock genre leave it below Storm Runner.
+- **Deep Intense Rock vs. the edge case:** Both profiles favor energetic rock, so Storm Runner ranks first for both. Its genre and energy matches outweigh its mood mismatch in the edge case.
 
-- Additional features or preferences  
-- Better ways to explain recommendations  
-- Improving diversity among the top results  
-- Handling more complex user tastes  
+The surprising result was Storm Runner ranking first for the edge case despite not matching its melancholy mood. I also increased genre's weight and decreased mood's weight: Gym Hero moved ahead of Rooftop Lights for pop, and Focus Flow moved ahead of Spacewalk Thoughts for lofi, while the other profiles' top-five ordering stayed the same.
 
 ---
 
-## 9. Personal Reflection  
+## 8. Future Work
 
-A few sentences about your experience.  
+- Add more songs and include more examples of underrepresented genres and moods.
+- Let users set the importance of each preference.
+- Add recommendation diversity and use acousticness, valence, or danceability.
 
-Prompts:  
+---
 
-- What you learned about recommender systems  
-- Something unexpected or interesting you discovered  
-- How this changed the way you think about music recommendation apps  
+## 9. Personal Reflection
+
+My biggest learning moment was seeing that weights can make a song rank first even when it misses a preference the user may care about. AI tools helped me explore the code and compare profile results, but I needed to check the actual weights, rerun the recommender, and verify the math because explanations can misstate what the code does. I was surprised that a simple weighted score can still feel like a recommendation when its top songs fit a profile, even though it does not understand music or a listener. If I extended this project, I would add more songs, let users adjust preference weights, and test whether a diversity step can introduce good alternatives.
