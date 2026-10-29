@@ -23,10 +23,13 @@ Some prompts to answer:
 
 - What features does each `Song` use in your system
   - For example: genre, mood, energy, tempo
+  Each Song includes an ID, title, artist, genre, mood, energy, tempo, valence, danceability, and acousticness. Genre and mood describe the song’s style and feel, while energy, tempo, valence, danceability, and acousticness describe aspects of its sound. The ID, title, and artist identify the song.
 - What information does your `UserProfile` store
+  The scoring rule compares each song with the preferences in the user profile. A matching mood is weighted slightly more than a matching genre. Energy is scored by how close it is to the user’s target, and acousticness is considered based on whether the user likes acoustic music. These feature scores can be combined into an overall score, with higher scores indicating a closer match. Tempo and valence are stored as song features but are not currently user preferences in UserProfile.
 - How does your `Recommender` compute a score for each song
+  The scoring rule compares each song with the preferences in the user profile. A matching mood is weighted slightly more than a matching genre. Energy is scored by how close it is to the user’s target, and acousticness is considered based on whether the user likes acoustic music. These feature scores can be combined into an overall score, with higher scores indicating a closer match. Tempo and valence are stored as song features but are not currently user preferences in UserProfile.
 - How do you choose which songs to recommend
-
+  The ranking rule orders songs by their overall scores, from highest to lowest, and selects the top results. Scoring measures how well each song matches. Ranking determines which of those matches to recommend first. However, there are some potential biases that may occur, like the weights and differences for energy and tempo reflect design choices. Different values can change which songs rank highest. Or even with only a small set of songs, the system may not have good matches for every preference.
 You can include a simple diagram or bullet list if helpful.
 
 ---
